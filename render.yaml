@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: flask-tax-app
+    runtime: python
+    buildCommand: ""
+    startCommand: python web.py
+    envVars:
+      - key: PORT
+        value: 10000
