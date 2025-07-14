@@ -205,7 +205,7 @@ html = '''
             </svg>
             Tax Calculator
         </h1>
-        <p class="description">กรอกเงินเดือนรายเดือนของมึง แล้วกดคำนวณภาษีได้เลย!</p>
+        <p class="description">กรอกเงินเดือนรายเดือนของคุณ แล้วกดคำนวณภาษีได้เลย!</p>
         <form method="post" novalidate>
             <input type="text" name="salary" placeholder="Enter your monthly salary (THB)" required autocomplete="off" value="{{ salary if salary else '' }}">
             <div class="btn-group">
