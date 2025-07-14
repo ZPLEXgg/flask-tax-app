@@ -87,6 +87,24 @@ html = '''
             text-shadow: 0 1px 3px rgba(0,0,0,0.7);
         }
 
+        /* ปุ่มผู้จัดทำ */
+        button#authors-btn {
+            margin-top: 20px;
+            padding: 12px 20px;
+            font-size: 18px;
+            background: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.6);
+            transition: background 0.3s ease;
+        }
+
+        button#authors-btn:hover {
+            background: #388e3c;
+        }
+
         /* Responsive สำหรับมือถือ */
         @media (max-width: 480px) {
             .container {
@@ -94,7 +112,7 @@ html = '''
                 padding: 30px 20px;
             }
 
-            input[type="text"], input[type="submit"] {
+            input[type="text"], input[type="submit"], button#authors-btn {
                 font-size: 16px;
                 padding: 10px 12px;
             }
@@ -115,7 +133,7 @@ html = '''
                 padding: 35px 30px;
             }
 
-            input[type="text"], input[type="submit"] {
+            input[type="text"], input[type="submit"], button#authors-btn {
                 font-size: 18px;
                 padding: 11px 13px;
             }
@@ -143,7 +161,21 @@ html = '''
         <p>Tax to Pay: {{ tax }} THB</p>
         <p>Net Salary after Tax: {{ net_salary }} THB</p>
         {% endif %}
+        <button id="authors-btn" onclick="showAuthors()">ผู้จัดทำ</button>
     </div>
+
+    <script>
+        function showAuthors() {
+            alert(
+                "ผู้จัดทำ:\\n\\n" +
+                "1. นายจารุวิทย์ เลขที่ 1 ห้อง 406\\n" +
+                "2. นายธนภัทร เลขที่ 8 ห้อง 406\\n" +
+                "3. นายนิชคุณ เลขที่ 11 ห้อง 406\\n" +
+                "4. นายวสุธรณ์ เลขที่ 20 ห้อง 406\\n\\n" +
+                "โรงเรียนสวนกุหลาบวิทยาลัย รังสิต"
+            );
+        }
+    </script>
 </body>
 </html>
 '''
@@ -181,4 +213,3 @@ def home():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)
-
