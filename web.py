@@ -21,24 +21,45 @@ html = '''
         }
 
         .container {
-            background: rgba(0, 0, 0, 0.6);
+            background: rgba(0, 0, 0, 0.7);
             padding: 40px 50px;
             border-radius: 15px;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
-            width: 350px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+            width: 370px;
             text-align: center;
+            position: relative;
         }
 
         h1 {
-            margin-bottom: 30px;
+            margin-bottom: 5px;
             font-size: 36px;
-            text-shadow: 0 2px 5px rgba(0,0,0,0.5);
+            text-shadow: 0 2px 5px rgba(0,0,0,0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* ไอคอนเงิน (SVG) */
+        .icon-money {
+            width: 36px;
+            height: 36px;
+            fill: #ffb74d;
+            filter: drop-shadow(0 0 2px rgba(0,0,0,0.5));
+        }
+
+        p.description {
+            margin: 8px 0 25px 0;
+            font-size: 16px;
+            color: #ddd;
+            font-style: italic;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.5);
         }
 
         input[type="text"] {
             width: 100%;
             padding: 12px 15px;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
             font-size: 18px;
             border: none;
             border-radius: 8px;
@@ -46,121 +67,161 @@ html = '''
             box-sizing: border-box;
         }
 
-        input[type="submit"] {
-            width: 100%;
+        input[type="submit"], button {
+            width: 48%;
             padding: 12px 15px;
-            font-size: 20px;
+            font-size: 18px;
             border: none;
             border-radius: 8px;
-            background: linear-gradient(45deg, #ff416c, #ff4b2b);
-            color: white;
             font-weight: bold;
             cursor: pointer;
-            box-shadow: 0 5px 15px rgba(255,75,43,0.6);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
             transition: background 0.3s ease;
+            color: white;
+        }
+
+        input[type="submit"] {
+            background: linear-gradient(45deg, #ff416c, #ff4b2b);
+            box-shadow: 0 5px 15px rgba(255,75,43,0.6);
         }
 
         input[type="submit"]:hover {
             background: linear-gradient(45deg, #ff4b2b, #ff416c);
         }
 
-        /* อนิเมชัน pulse เวลากดปุ่ม */
-        @keyframes pulse {
-          0% {
-            box-shadow: 0 0 0 0 rgba(255, 75, 43, 0.7);
-          }
-          70% {
-            box-shadow: 0 0 20px 10px rgba(255, 75, 43, 0);
-          }
-          100% {
-            box-shadow: 0 0 0 0 rgba(255, 75, 43, 0);
-          }
+        button#reset-btn {
+            background: #777;
+            box-shadow: 0 5px 15px rgba(100,100,100,0.6);
+        }
+        button#reset-btn:hover {
+            background: #555;
         }
 
-        input[type="submit"]:active {
-          animation: pulse 0.7s ease-out;
-        }
-
-        p, h2 {
-            margin: 10px 0;
-            font-weight: 600;
-            text-shadow: 0 1px 3px rgba(0,0,0,0.7);
-        }
-
-        /* ปุ่มผู้จัดทำ */
         button#authors-btn {
-            margin-top: 20px;
-            padding: 12px 20px;
-            font-size: 18px;
+            margin-top: 25px;
+            width: 100%;
             background: #4caf50;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
             box-shadow: 0 5px 15px rgba(76, 175, 80, 0.6);
-            transition: background 0.3s ease;
+            font-size: 18px;
         }
-
         button#authors-btn:hover {
             background: #388e3c;
         }
 
-        /* Responsive สำหรับมือถือ */
+        /* เส้นแบ่ง */
+        hr.divider {
+            margin: 25px 0 15px 0;
+            border: none;
+            height: 1.5px;
+            background: linear-gradient(to right, transparent, #ff4b2b, transparent);
+            box-shadow: 0 1px 6px #ff4b2b;
+        }
+
+        /* ผลลัพธ์ */
+        h2 {
+            margin-bottom: 10px;
+            font-size: 28px;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.6);
+        }
+
+        p.result {
+            margin: 6px 0;
+            font-weight: 600;
+            font-size: 18px;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.7);
+        }
+
+        /* ปุ่ม container เล็กๆ */
+        .btn-group {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        /* Responsive มือถือ */
         @media (max-width: 480px) {
             .container {
                 width: 90vw;
                 padding: 30px 20px;
             }
 
-            input[type="text"], input[type="submit"], button#authors-btn {
-                font-size: 16px;
-                padding: 10px 12px;
-            }
-
             h1 {
                 font-size: 28px;
             }
 
-            h2, p {
-                font-size: 18px;
+            p.description {
+                font-size: 14px;
+            }
+
+            input[type="text"], input[type="submit"], button {
+                font-size: 16px;
+                padding: 10px 12px;
+            }
+
+            h2 {
+                font-size: 24px;
+            }
+
+            p.result {
+                font-size: 16px;
             }
         }
 
-        /* Responsive สำหรับแท็บเล็ต */
+        /* Responsive แท็บเล็ต */
         @media (min-width: 481px) and (max-width: 768px) {
             .container {
                 width: 70vw;
                 padding: 35px 30px;
             }
 
-            input[type="text"], input[type="submit"], button#authors-btn {
-                font-size: 18px;
-                padding: 11px 13px;
-            }
-
             h1 {
                 font-size: 32px;
             }
 
-            h2, p {
-                font-size: 20px;
+            p.description {
+                font-size: 15px;
+            }
+
+            input[type="text"], input[type="submit"], button {
+                font-size: 18px;
+                padding: 11px 13px;
+            }
+
+            h2 {
+                font-size: 26px;
+            }
+
+            p.result {
+                font-size: 17px;
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Tax Calculator</h1>
+        <h1>
+            <svg class="icon-money" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M12 1C5.925 1 1 5.925 1 12s4.925 11 11 11 11-4.925 11-11S18.075 1 12 1zm0 20c-4.963 0-9-4.037-9-9s4.037-9 9-9 9 4.037 9 9-4.037 9-9 9zm-.5-13v2.5h-3v3h3v2.5h3v-2.5h2v-3h-2V8h-3z"/>
+            </svg>
+            Tax Calculator
+        </h1>
+        <p class="description">กรอกเงินเดือนรายเดือนของมึง แล้วกดคำนวณภาษีได้เลย!</p>
         <form method="post" novalidate>
-            <input type="text" name="salary" placeholder="Enter your monthly salary (THB)" required>
-            <input type="submit" value="Calculate Tax">
+            <input type="text" name="salary" placeholder="Enter your monthly salary (THB)" required autocomplete="off" value="{{ salary if salary else '' }}">
+            <div class="btn-group">
+                <input type="submit" value="Calculate Tax">
+                <button type="button" id="reset-btn" onclick="resetForm()">Reset</button>
+            </div>
         </form>
+
         {% if tax is not none %}
+        <hr class="divider">
         <h2>Results:</h2>
-        <p>Monthly Salary: {{ salary }} THB</p>
-        <p>Tax to Pay: {{ tax }} THB</p>
-        <p>Net Salary after Tax: {{ net_salary }} THB</p>
+        <p class="result">Monthly Salary: {{ salary }} THB</p>
+        <p class="result">Tax to Pay: {{ tax }} THB</p>
+        <p class="result">Net Salary after Tax: {{ net_salary }} THB</p>
         {% endif %}
+
         <button id="authors-btn" onclick="showAuthors()">ผู้จัดทำ</button>
     </div>
 
@@ -174,6 +235,10 @@ html = '''
                 "4. นายวสุธรณ์ เลขที่ 20 ห้อง 406\\n\\n" +
                 "โรงเรียนสวนกุหลาบวิทยาลัย รังสิต"
             );
+        }
+
+        function resetForm() {
+            document.querySelector('input[name="salary"]').value = '';
         }
     </script>
 </body>
