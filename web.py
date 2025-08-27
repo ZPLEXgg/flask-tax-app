@@ -1,280 +1,149 @@
-from flask import Flask, render_template_string, request
+from flask import Flask, request, jsonify, redirect, render_template_string
 
 app = Flask(__name__)
 
-html = '''
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Tax Calculator</title>
-    <style>
-        /* พื้นฐาน */
-        body {
-            margin: 0;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: linear-gradient(135deg, #6a11cb, #2575fc);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: white;
-        }
+BASE_SALARY = 15000
+EXP_BONUS_PER_MONTH = 1400
+EXP_MAX_MONTHS = 60
 
-        .container {
-            background: rgba(0, 0, 0, 0.7);
-            padding: 40px 50px;
-            border-radius: 15px;
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
-            width: 370px;
-            text-align: center;
-            position: relative;
-        }
+EDU_BONUS = {
+    "ม.6 หรือเทียบเท่า": 0,
+    "ปริญญาตรี": 10000,
+    "ปริญญาโท": 20000,
+    "ปริญญาเอก": 30000,
+}
 
-        h1 {
-            margin-bottom: 5px;
-            font-size: 36px;
-            text-shadow: 0 2px 5px rgba(0,0,0,0.6);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-        }
+def calc_salary(months: int, education: str) -> int:
+    months = max(0, int(months))
+    exp_bonus = min(months, EXP_MAX_MONTHS) * EXP_BONUS_PER_MONTH
+    edu_bonus = EDU_BONUS.get(education, 0)
+    return BASE_SALARY + exp_bonus + edu_bonus
 
-        /* ไอคอนเงิน (SVG) */
-        .icon-money {
-            width: 36px;
-            height: 36px;
-            fill: #ffb74d;
-            filter: drop-shadow(0 0 2px rgba(0,0,0,0.5));
-        }
+# หน้าแรก
+@app.route("/", methods=["GET", "POST"])
+def index():
+    error = None
+    result = None
+    if request.method == "POST":
+        try:
+            months = int(request.form.get("months", "0"))
+            education = request.form.get("education", "ม.6 หรือเทียบเท่า")
+            result = calc_salary(months, education)
+        except (ValueError, TypeError):
+            error = "กรุณากรอกจำนวนเดือนเป็นตัวเลข"
 
-        p.description {
-            margin: 8px 0 25px 0;
-            font-size: 16px;
-            color: #ddd;
-            font-style: italic;
-            text-shadow: 0 1px 3px rgba(0,0,0,0.5);
-        }
-
-        input[type="text"] {
-            width: 100%;
-            padding: 12px 15px;
-            margin-bottom: 20px;
-            font-size: 18px;
-            border: none;
-            border-radius: 8px;
-            outline: none;
-            box-sizing: border-box;
-        }
-
-        input[type="submit"], button {
-            width: 48%;
-            padding: 12px 15px;
-            font-size: 18px;
-            border: none;
-            border-radius: 8px;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
-            transition: background 0.3s ease;
-            color: white;
-        }
-
-        input[type="submit"] {
-            background: linear-gradient(45deg, #ff416c, #ff4b2b);
-            box-shadow: 0 5px 15px rgba(255,75,43,0.6);
-        }
-
-        input[type="submit"]:hover {
-            background: linear-gradient(45deg, #ff4b2b, #ff416c);
-        }
-
-        button#reset-btn {
-            background: #777;
-            box-shadow: 0 5px 15px rgba(100,100,100,0.6);
-        }
-        button#reset-btn:hover {
-            background: #555;
-        }
-
-        button#authors-btn {
-            margin-top: 25px;
-            width: 100%;
-            background: #4caf50;
-            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.6);
-            font-size: 18px;
-        }
-        button#authors-btn:hover {
-            background: #388e3c;
-        }
-
-        /* เส้นแบ่ง */
-        hr.divider {
-            margin: 25px 0 15px 0;
-            border: none;
-            height: 1.5px;
-            background: linear-gradient(to right, transparent, #ff4b2b, transparent);
-            box-shadow: 0 1px 6px #ff4b2b;
-        }
-
-        /* ผลลัพธ์ */
-        h2 {
-            margin-bottom: 10px;
-            font-size: 28px;
-            text-shadow: 0 2px 5px rgba(0,0,0,0.6);
-        }
-
-        p.result {
-            margin: 6px 0;
-            font-weight: 600;
-            font-size: 18px;
-            text-shadow: 0 1px 3px rgba(0,0,0,0.7);
-        }
-
-        /* ปุ่ม container เล็กๆ */
-        .btn-group {
-            display: flex;
-            justify-content: space-between;
-            gap: 10px;
-        }
-
-        /* Responsive มือถือ */
-        @media (max-width: 480px) {
-            .container {
-                width: 90vw;
-                padding: 30px 20px;
-            }
-
-            h1 {
-                font-size: 28px;
-            }
-
-            p.description {
-                font-size: 14px;
-            }
-
-            input[type="text"], input[type="submit"], button {
-                font-size: 16px;
-                padding: 10px 12px;
-            }
-
-            h2 {
-                font-size: 24px;
-            }
-
-            p.result {
-                font-size: 16px;
-            }
-        }
-
-        /* Responsive แท็บเล็ต */
-        @media (min-width: 481px) and (max-width: 768px) {
-            .container {
-                width: 70vw;
-                padding: 35px 30px;
-            }
-
-            h1 {
-                font-size: 32px;
-            }
-
-            p.description {
-                font-size: 15px;
-            }
-
-            input[type="text"], input[type="submit"], button {
-                font-size: 18px;
-                padding: 11px 13px;
-            }
-
-            h2 {
-                font-size: 26px;
-            }
-
-            p.result {
-                font-size: 17px;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>
-            <svg class="icon-money" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                <path d="M12 1C5.925 1 1 5.925 1 12s4.925 11 11 11 11-4.925 11-11S18.075 1 12 1zm0 20c-4.963 0-9-4.037-9-9s4.037-9 9-9 9 4.037 9 9-4.037 9-9 9zm-.5-13v2.5h-3v3h3v2.5h3v-2.5h2v-3h-2V8h-3z"/>
-            </svg>
-            Tax Calculator
-        </h1>
-        <p class="description">กรอกเงินเดือนรายเดือนของคุณ แล้วกดคำนวณภาษีได้เลย!</p>
-        <form method="post" novalidate>
-            <input type="text" name="salary" placeholder="Enter your monthly salary (THB)" required autocomplete="off" value="{{ salary if salary else '' }}">
-            <div class="btn-group">
-                <input type="submit" value="Calculate Tax">
-                <button type="button" id="reset-btn" onclick="resetForm()">Reset</button>
+    html = """
+    <!DOCTYPE html>
+    <html lang="th">
+    <head>
+        <meta charset="UTF-8">
+        <title>คำนวณเงินเดือน</title>
+        <style>
+            body { font-family: sans-serif; background: #f9f9f9; padding: 30px; text-align: center; }
+            form { background: white; padding: 20px; display: inline-block; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+            input, select { padding: 10px; margin: 10px 0; width: 250px; }
+            button { padding: 10px 20px; background: #ff6f61; border: none; color: white; font-weight: bold; cursor: pointer; border-radius: 5px; }
+            button:hover { background: #ff4b3e; }
+            .error { color: red; }
+            .result { margin-top: 20px; font-size: 1.2em; font-weight: bold; }
+            .nav { margin-top: 30px; }
+            .nav a { margin: 0 10px; color: #555; text-decoration: none; font-weight: bold; }
+            .nav a:hover { text-decoration: underline; }
+        </style>
+    </head>
+    <body>
+        <h1>💰 โปรแกรมคำนวณเงินเดือน</h1>
+        <form method="POST">
+            <div>
+                <label>ระบุจำนวนเดือนประสบการณ์:</label><br>
+                <input type="number" name="months" min="0" max="100" required>
             </div>
+            <div>
+                <label>ระดับการศึกษา:</label><br>
+                <select name="education">
+                    {% for edu in edu_bonus.keys() %}
+                        <option value="{{ edu }}">{{ edu }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit">คำนวณ</button>
         </form>
-
-        {% if tax is not none %}
-        <hr class="divider">
-        <h2>Results:</h2>
-        <p class="result">Monthly Salary: {{ salary }} THB</p>
-        <p class="result">Tax to Pay: {{ tax }} THB</p>
-        <p class="result">Net Salary after Tax: {{ net_salary }} THB</p>
+        {% if error %}
+            <div class="error">{{ error }}</div>
+        {% endif %}
+        {% if result %}
+            <div class="result">💸 เงินเดือนที่ได้: {{ result }} บาท</div>
         {% endif %}
 
-        <button id="authors-btn" onclick="showAuthors()">ผู้จัดทำ</button>
-    </div>
+        <div class="nav">
+            <a href="/about">👨‍👩‍👦‍👦 ผู้จัดทำ</a>
+        </div>
+    </body>
+    </html>
+    """
+    return render_template_string(html,
+        error=error,
+        result=result,
+        edu_bonus=EDU_BONUS
+    )
 
-    <script>
-        function showAuthors() {
-            alert(
-                "ผู้จัดทำ:\\n\\n" +
-                "1. นายจารุวิทย์ เลขที่ 1 ห้อง 406\\n" +
-                "2. นายธนภัทร เลขที่ 8 ห้อง 406\\n" +
-                "3. นายนิชคุณ เลขที่ 11 ห้อง 406\\n" +
-                "4. นายวสุธรณ์ เลขที่ 20 ห้อง 406\\n\\n" +
-                "โรงเรียนสวนกุหลาบวิทยาลัย รังสิต"
-            );
-        }
+# API สำหรับคำนวณแบบ JSON
+@app.route("/api/calc", methods=["POST"])
+def api_calc():
+    data = request.get_json(force=True, silent=True) or {}
+    months = int(data.get("months", 0))
+    education = data.get("education", "ม.6 หรือเทียบเท่า")
+    return jsonify({
+        "salary": calc_salary(months, education),
+        "base": BASE_SALARY,
+        "exp_bonus_per_month": EXP_BONUS_PER_MONTH,
+        "exp_capped_months": EXP_MAX_MONTHS,
+        "education_bonus": EDU_BONUS.get(education, 0)
+    })
 
-        function resetForm() {
-            document.querySelector('input[name="salary"]').value = '';
-        }
-    </script>
-</body>
-</html>
-'''
+# หน้าเกี่ยวกับผู้จัดทำ
+@app.route("/about")
+def about():
+    authors = [
+        "1. นายจารุวิทย์ เลขที่ 1 ห้อง 406",
+        "2. นายธนภัทร เลขที่ 8 ห้อง 406",
+        "3. นายนิชคุณ เลขที่ 11 ห้อง 406",
+        "4. นายวสุธรณ์ เลขที่ 20 ห้อง 406",
+    ]
+    school = "🏫 โรงเรียนสวนกุหลาบวิทยาลัย รังสิต"
 
-def calculate_tax(salary):
-    tax = 0
-    if salary <= 15000:
-        tax = 0
-    elif salary <= 30000:
-        tax = (salary - 15000) * 0.05
-    elif salary <= 50000:
-        tax = (15000 * 0.05) + (salary - 30000) * 0.10
-    else:
-        tax = (15000 * 0.05) + (20000 * 0.10) + (salary - 50000) * 0.15
-    return round(tax, 2)
+    html = """
+    <!DOCTYPE html>
+    <html lang="th">
+    <head>
+        <meta charset="UTF-8">
+        <title>ผู้จัดทำ</title>
+        <style>
+            body { font-family: sans-serif; background: #fff8f0; padding: 30px; text-align: center; }
+            .card { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); display: inline-block; }
+            h1 { color: #ff6f61; }
+            ul { list-style: none; padding: 0; font-size: 1.1em; }
+            li { margin: 5px 0; }
+            .school { margin-top: 20px; font-weight: bold; font-size: 1.2em; color: #333; }
+            a { display: inline-block; margin-top: 20px; text-decoration: none; color: #555; font-weight: bold; }
+            a:hover { text-decoration: underline; }
+        </style>
+    </head>
+    <body>
+        <div class="card">
+            <h1>👨‍💻 ผู้จัดทำ</h1>
+            <ul>
+                {% for a in authors %}
+                    <li>{{ a }}</li>
+                {% endfor %}
+            </ul>
+            <div class="school">{{ school }}</div>
+            <a href="/">⬅ กลับหน้าคำนวณ</a>
+        </div>
+    </body>
+    </html>
+    """
+    return render_template_string(html, authors=authors, school=school)
 
-@app.route('/', methods=['GET', 'POST'])
-def home():
-    tax = None
-    salary = None
-    net_salary = None
-    if request.method == 'POST':
-        salary_text = request.form.get('salary')
-        try:
-            salary = float(salary_text)
-            if salary < 0:
-                tax = 'Invalid salary!'
-            else:
-                tax = calculate_tax(salary)
-                net_salary = round(salary - tax, 2)
-        except:
-            tax = 'Invalid input!'
-
-    return render_template_string(html, tax=tax, salary=salary, net_salary=net_salary)
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', debug=True)
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000)
