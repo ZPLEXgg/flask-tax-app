@@ -72,7 +72,7 @@ def index():
         <div class="container">
             <h2>คำนวณเงินเดือน & ภาษี</h2>
             <form method="POST">
-                <label>จำนวนเดือนประสบการณ์</label>
+                <label>จำนวนเดือนที่ทำงาน</label>
                 <input type="number" name="months" required>
                 
                 <label>วุฒิการศึกษา</label>
